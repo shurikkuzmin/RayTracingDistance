@@ -10,6 +10,7 @@ L=1.0
 
 pygame.init()
 RED=(255,0,0)
+BACKGROUND=(255,255,255)
 
 eye=numpy.array([0.0,0.0,0.0])
 sphere={}
@@ -25,17 +26,38 @@ def convert(i,j):
 
 def rayTracing(i,j):
     screenPoint=convert(i,j)
-    ray=screenPoint-eye   
+    ray=screenPoint-eye 
+    vecE=ray/numpy.linalg.norm(ray)
+    point=screenPoint 
+    isTouched=False
+    for iteration in range(10):
+        dist=distance(sphere,point)
+        if dist<0.0:
+            isTouched=True 
+            break
+        dist=max(0.001,dist)
+        point=point+dist*vecE
+    if isTouched:
+        return sphere["color"]
+    return BACKGROUND    
+
+
+def distance(sphere,point):
+    vec=sphere["center"]-point 
+    return numpy.linalg.norm(vec)-sphere["radius"]
+
+
+
 
 # Set up the window.
 windowSurface = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT),0, 32)
 pygame.display.set_caption('Raytracing')
 scene = pygame.PixelArray(windowSurface)
 
-#for i in range(WINDOWWIDTH):
-#    for j in range(WINDOWHEIGHT):
-#        
-#        scene[i,j]=ray() 
+for i in range(WINDOWWIDTH):
+    for j in range(WINDOWHEIGHT):
+        
+        scene[i,j]=rayTracing(i,j) 
 
 while True:
     # Check for events.
