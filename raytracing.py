@@ -18,6 +18,10 @@ sphere["radius"]=1
 sphere["center"]=numpy.array([0.0,0.0,3.0])
 sphere["color"]=RED
 
+lightSource={}
+lightSource["center"]=numpy.array([1.5,1.5,1.0])
+
+
 def convert(i,j):
     x= W/2-i/(WINDOWWIDTH-1)*W
     y= H/2-j/(WINDOWHEIGHT-1)*H
@@ -38,7 +42,17 @@ def rayTracing(i,j):
         dist=max(0.001,dist)
         point=point+dist*vecE
     if isTouched:
-        return sphere["color"]
+        vecLight=lightSource["center"]-point
+        vecLight=vecLight/numpy.linalg.norm(vecLight)
+        vecSphere=point-sphere["center"]
+        vecSphere=vecSphere/numpy.linalg.norm(vecSphere)
+        cosA=vecLight[0]*vecSphere[0]+vecLight[1]*vecSphere[1]+vecLight[2]*vecSphere[2]
+        light=0.3
+        if cosA>0.0:
+            light=min(light+cosA,1.0)
+
+        return (int(sphere["color"][0]*light),int(sphere["color"][1]*light),int(sphere["color"][2]*light))
+    
     return BACKGROUND    
 
 
