@@ -34,22 +34,34 @@ def rayTracing(i,j):
     vecE=ray/numpy.linalg.norm(ray)
     point=screenPoint 
     isTouched=False
-    for iteration in range(10):
+    for iteration in range(20):
         dist=distance(sphere,point)
         if dist<0.0:
             isTouched=True 
             break
-        dist=max(0.001,dist)
+        dist=max(0.01,dist)
         point=point+dist*vecE
     if isTouched:
         vecLight=lightSource["center"]-point
         vecLight=vecLight/numpy.linalg.norm(vecLight)
-        vecSphere=point-sphere["center"]
-        vecSphere=vecSphere/numpy.linalg.norm(vecSphere)
-        cosA=vecLight[0]*vecSphere[0]+vecLight[1]*vecSphere[1]+vecLight[2]*vecSphere[2]
-        light=0.3
+        #vecSphere=point-sphere["center"]
+        #vecSphere=vecSphere/numpy.linalg.norm(vecSphere)
+        vecSurface=numpy.array([0.0,0.0,0.0])
+        eps = 0.1
+        dist = distance(sphere,point)
+        vecSurface[0] = distance(sphere,point+numpy.array([eps,0.0,0.0]))-dist
+        vecSurface[1] = distance(sphere,point+numpy.array([0.0,eps,0.0]))-dist
+        vecSurface[2] = distance(sphere,point+numpy.array([0.0,0.0,eps]))-dist
+        vecSurface = vecSurface/numpy.linalg.norm(vecSurface)
+
+        cosA=vecLight[0]*vecSurface[0]+vecLight[1]*vecSurface[1]+vecLight[2]*vecSurface[2]
+        light=0.2
         if cosA>0.0:
             light=min(light+cosA,1.0)
+        twoPi=2*numpy.pi 
+        #light=light*abs(vecSphere[0]+vecSphere[1]+vecSphere[2])/3.0
+        #light=light*abs(numpy.cos(2*vecSphere[0]*twoPi)*numpy.cos(2*vecSphere[1]*twoPi)*numpy.cos(2*vecSphere[2]*twoPi))
+
 
         return (int(sphere["color"][0]*light),int(sphere["color"][1]*light),int(sphere["color"][2]*light))
     
@@ -57,8 +69,12 @@ def rayTracing(i,j):
 
 
 def distance(sphere,point):
-    vec=sphere["center"]-point 
-    return numpy.linalg.norm(vec)-sphere["radius"]
+    vec=sphere["center"]-point
+    vec2=point-sphere["center"]
+    vec2=vec2/numpy.linalg.norm(vec2)
+    twoPi=2*numpy.pi 
+    return numpy.linalg.norm(vec)-(sphere["radius"]+0.2*numpy.cos(2.0*vec2[0]*twoPi)*numpy.cos(2.0*vec2[1]*twoPi)*numpy.cos(2.0*vec2[2]*twoPi))
+
 
 
 
