@@ -39,7 +39,7 @@ def rayTracing(i,j):
         if dist<0.0:
             isTouched=True 
             break
-        dist=max(0.01,dist)
+        dist=max(0.001,dist)
         point=point+dist*vecE
     if isTouched:
         vecLight=lightSource["center"]-point
@@ -47,7 +47,7 @@ def rayTracing(i,j):
         #vecSphere=point-sphere["center"]
         #vecSphere=vecSphere/numpy.linalg.norm(vecSphere)
         vecSurface=numpy.array([0.0,0.0,0.0])
-        eps = 0.1
+        eps = 0.001
         dist = distance(sphere,point)
         vecSurface[0] = distance(sphere,point+numpy.array([eps,0.0,0.0]))-dist
         vecSurface[1] = distance(sphere,point+numpy.array([0.0,eps,0.0]))-dist
