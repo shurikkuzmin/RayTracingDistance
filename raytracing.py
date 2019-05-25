@@ -2,6 +2,8 @@ import pygame
 import sys
 from pygame.locals import *
 import numpy
+import perlin
+from scipy.interpolate import Rbf
 WINDOWHEIGHT=300
 WINDOWWIDTH=300
 W=1.0
@@ -21,6 +23,19 @@ sphere["color"]=RED
 lightSource={}
 lightSource["center"]=numpy.array([1.5,1.5,1.0])
 
+# Set up the Perlin's noise
+NPERLIN = 31
+x = numpy.linspace(0.0,10.0-10.0/(NPERLIN-1),NPERLIN)
+y = numpy.linspace(0.0,10.0-10.0/(NPERLIN-1),NPERLIN)
+
+res = numpy.zeros((NPERLIN,NPERLIN))
+for i, xCoor in enumerate(x):
+    for j, yCoor in enumerate(y):
+        res[i,j] = perlin.noise(xCoor,yCoor)
+phi = 2*numpy.pi/10.0 * x
+theta = numpy.pi/10.0 * y
+phiMesh,thetaMesh = numpy.meshgrid(phi,theta)
+rbf = Rbf(phiMesh,thetaMesh,res)
 
 def convert(i,j):
     x= W/2-i/(WINDOWWIDTH-1)*W
@@ -73,16 +88,19 @@ def distance(sphere,point):
     vec2=point-sphere["center"]
     vec2=vec2/numpy.linalg.norm(vec2)
     twoPi=2*numpy.pi 
-    return numpy.linalg.norm(vec)-(sphere["radius"]+0.2*numpy.cos(2.0*vec2[0]*twoPi)*numpy.cos(2.0*vec2[1]*twoPi)*numpy.cos(2.0*vec2[2]*twoPi))
-
-
-
-
+    pheta = numpy.pi+numpy.arctan2(vec2[0],vec2[1])
+    theta = numpy.arctan2(vec2[2],numpy.sqrt(vec2[0]**2+vec2[1]**2))
+    valueNoise = rbf(pheta,theta)
+    #phetaIndex = int((numpy.pi+numpy.arctan2(vec2[0],vec2[1]))/(twoPi)*(NPERLIN-1))
+    #thetaIndex = int(numpy.arctan2(vec2[2],numpy.sqrt(vec2[0]**2+vec2[1]**2))/numpy.pi*(NPERLIN-1))
+    #return numpy.linalg.norm(vec)-(sphere["radius"]+0.2*numpy.cos(2.0*vec2[0]*twoPi)*numpy.cos(2.0*vec2[1]*twoPi)*numpy.cos(2.0*vec2[2]*twoPi))
+    return numpy.linalg.norm(vec)-(sphere["radius"]+3*valueNoise)
 
 # Set up the window.
 windowSurface = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT),0, 32)
 pygame.display.set_caption('Raytracing')
 scene = pygame.PixelArray(windowSurface)
+
 
 for i in range(WINDOWWIDTH):
     for j in range(WINDOWHEIGHT):

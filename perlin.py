@@ -24,7 +24,7 @@ def gradient(iX,iY,x,y):
 
     return deltaX * grad[iX,iY,0] + deltaY * grad[iX,iY,1]
 
-def perlin(x, y):
+def noise(x, y):
     x0 = int(x)
     x1 = x0 + 1
     y0 = int(y)
@@ -41,13 +41,3 @@ def perlin(x, y):
     interp34 = interpolate(corner3, corner4, deltaX)
     return interpolate(interp12, interp34, deltaY)
 
-x = numpy.linspace(0.0,10.0-10.0/30,31)
-y = numpy.linspace(0.0,10.0-10.0/30,31)
-X,Y = numpy.meshgrid(x,y)
-
-res = numpy.zeros_like(X)
-for i, xCoor in enumerate(x):
-    for j, yCoor in enumerate(y):
-        res[i,j] = perlin(xCoor,yCoor)
-pylab.imshow(res)
-pylab.show()
